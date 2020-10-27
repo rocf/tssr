@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BootstrapBlazor" Version="3.1.26" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SX.TSSR.Infrastructure\SX.TSSR.Infrastructure.csproj" />
   </ItemGroup>
 
