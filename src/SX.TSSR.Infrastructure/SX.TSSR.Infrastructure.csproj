@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SX.TSSR.Application\SX.TSSR.Application.csproj" />
+    <ProjectReference Include="..\SX.TSSR.Domain\SX.TSSR.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
