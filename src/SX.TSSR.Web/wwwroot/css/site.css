@@ -749,6 +749,10 @@ section {
             margin-top: 1rem;
         }
 
+.card-border {
+    border-top: solid 3px #3c8dbc;
+}
+
 @media (min-width: 576px) {
     .intro .card {
         border-color: #dce3e8;

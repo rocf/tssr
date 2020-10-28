@@ -49,7 +49,6 @@ namespace SX.TSSR.Web
             {
                 var supportedCultures = Configuration.GetSupportCultures().ToList();
                 options.DefaultRequestCulture = new RequestCulture(CultureInfo.CurrentCulture);
-                //options.DefaultRequestCulture = new RequestCulture(new CultureInfo("zh-CN"));
                 options.SupportedCultures = supportedCultures;
                 options.SupportedUICultures = supportedCultures;
             });

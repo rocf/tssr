@@ -7,11 +7,13 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Data.SqlClient;
+using SX.TSSR.Application.Models;
 
 namespace SX.TSSR.Application.Features.ClosingRateStatistics.Queries.GetClosureRateOfRegionalIssues
 {
-    public class GetClosureRateOfRegionalIssuesDetailQuery: IRequest<IEnumerable<ClosureRateOfRegionalIssuesDetailVm>>
+    public class GetClosureRateOfRegionalIssuesDetailQuery : IRequest<IEnumerable<ClosureRateOfRegionalIssuesDetailVm>>
     {
+        public ClosureRateOfRegionalIssuesQueryModel QueryModel { get; set; }
         public class GetClosureRateOfRegionalIssuesDetailQueryHandler : IRequestHandler<GetClosureRateOfRegionalIssuesDetailQuery,
                                                                                 IEnumerable<ClosureRateOfRegionalIssuesDetailVm>>
         {
@@ -25,12 +27,13 @@ namespace SX.TSSR.Application.Features.ClosingRateStatistics.Queries.GetClosureR
             {
                 using (var conn = new SqlConnection(Constants.SqlServerConnectionString))
                 {
-                    string sql = @"
+                    StringBuilder sbSql = new StringBuilder();
+                    sbSql.Append(@"
 WITH t AS (
 	SELECT  QADictionary.name AS Trade ,	--行业
 			QAUser.name AS DealWither ,		--负责人
             QAQuestion.industry AS Provice ,	--区域
-            COUNT(*) AS regionQuesNum ,		--区域问题数
+            COUNT(*) AS RegionQuestionNum ,		--区域问题数
             SUM(CASE ISNULL(ModifyCode, 1)
                     WHEN '1' THEN 1
                     ELSE 0
@@ -66,7 +69,16 @@ WITH t AS (
 	AND QAQuestion.userid NOT LIKE '9876'	--非9876代理(历史测试代理?!)
 	AND ( Category <> '2' AND Category <> '6'  AND category <> '8')	--非需求类问题
 	AND dealwither IS NOT NULL	--负责人不为空
+
+");
+                    if (request.QueryModel.Trade != "-1")
+                    {
+                        sbSql.Append(@"
     AND QADeptMaintenance.dept = @Trade
+ ");
+                    }
+
+                    sbSql.Append(@"
 	AND CONVERT(CHAR(10), QAQuestion.FirstSubmitDate, 121) >=  @BeginDate
     AND CONVERT(CHAR(10), QAQuestion.FirstSubmitDate, 121) <=  @EndDate
 	GROUP BY  QAQuestion.industry ,
@@ -76,32 +88,33 @@ WITH t AS (
 SELECT  t.Trade,	--行业
 		t.DealWither ,		--负责人
 		t.Provice,		--区域
-		t.RegionQuesNum,	--区域问题数
+		t.RegionQuestionNum,	--区域问题数
 		t.NoMoidficationQuestionNum,	--无修改问题数
 		t.HandledQuestionNum,		--负责人处理问题数
-        ( t.NoMoidficationQuestionNum - t.HandledQuestionNum ) AS assistDealNum ,		--协助处理问题数
+        ( t.NoMoidficationQuestionNum - t.HandledQuestionNum ) AS AssistHandledQuestionNum ,		--协助处理问题数
 		t.ClosedQuestionNum,		--关闭问题数
         ( CASE WHEN t.NoMoidficationQuestionNum = 0 THEN '0.00%'
                ELSE RTRIM(CONVERT(DECIMAL(18, 2), t.ClosedQuestionNum * 100.0
                           / t.NoMoidficationQuestionNum)) + '%'
-          END ) AS regionClosedRate ,		--区域问题关闭率
+          END ) AS RegionClosedQuestionRate ,		--区域问题关闭率
         ( CASE WHEN t.NoMoidficationQuestionNum = 0 THEN '0.00%'
                ELSE RTRIM(CONVERT(DECIMAL(18, 2), t.HandledQuestionNum * 100.0
                           / t.NoMoidficationQuestionNum)) + '%'
-          END ) AS handRate			--负责人处理比率
+          END ) AS HandledQuestionRate			--负责人处理比率
 		  FROM t
-		  ORDER BY t.DealWither
-";
+		  ORDER BY  t.Trade, t.DealWither
+");
 
                     try
                     {
-                        var vm = await conn.QueryAsync<ClosureRateOfRegionalIssuesDetailVm>(sql, new
+                        var vm = await conn.QueryAsync<ClosureRateOfRegionalIssuesDetailVm>(sbSql.ToString(), new
                         {
-                            BeginDate = "2020-04-19",
-                            EndDate = "2020-4-24",
-                            Trade = "6",
-                            Trades = new List<string>() { "1", "2", "3", "6", "8", "H", "I", "C", "G", "L", "M" }
+                            BeginDate = request.QueryModel.BeginDate,
+                            EndDate = request.QueryModel.EndDate,
+                            Trade = request.QueryModel.Trade,
+                            Trades = Constants.Trades
                         });
+
                         return vm;
                     }
                     catch (Exception ex)
@@ -110,7 +123,7 @@ SELECT  t.Trade,	--行业
                     }
                     finally
                     {
-                       
+
                     }
                     return null;
                 }

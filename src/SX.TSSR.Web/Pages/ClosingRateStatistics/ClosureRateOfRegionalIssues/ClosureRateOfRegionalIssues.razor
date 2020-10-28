@@ -1,0 +1,109 @@
+﻿@page "/ClosureRateOfRegionalIssues"
+
+@using SX.TSSR.Application.Features.ClosingRateStatistics.Queries.GetClosureRateOfRegionalIssues
+@using SX.TSSR.Web.Common
+
+<Card style="border-top: solid 3px #3c8dbc">
+    <CardHeader>查询条件</CardHeader>
+    <CardBody>
+        <EditorForm Model="@QueryModel">
+            <FieldItems>
+                <EditorItem @bind-Field="@QueryModel.Trade">
+                    <EditTemplate Context="value">
+                        <div class="form-group col-12 col-sm-6">
+                            <label class="control-label">行业</label>
+                            <Select Items="@Constants.TradeSelectedItems" @bind-Value="@QueryModel.Trade"></Select>
+                        </div>
+                    </EditTemplate>
+                </EditorItem>
+            </FieldItems>
+            <Buttons>
+                <div class="d-flex mt-3">
+                    <Button Icon="fa fa-fw fa-search" Text="查询" @onclick="@QueryAsync"></Button>
+                </div>
+            </Buttons>
+        </EditorForm>
+    </CardBody>
+</Card>
+<Divider></Divider>
+<Card style="border-top: solid 3px #3c8dbc">
+    <CardHeader>查询结果</CardHeader>
+    <CardBody>
+        @if (vmDetail != null)
+        {
+            if (vmDetail.Count() == 0)
+            {
+                <span>查询结果为空，请修改查询条件，再次查询。</span>
+            }
+            else
+            {
+                <Tab >
+                    <TabItem Text="明细">     
+                        <Table TItem="ClosureRateOfRegionalIssuesDetailVm" Items="vmDetail" 
+                               IsStriped="true" IsBordered="true" TableSize="TableSize.Normal"
+                               ShowLineNo="true" ShowSkeleton="true" Height="500" 
+                               OnQueryAsync="@OnQueryAsync">
+                            <TableColumns>
+                                <TableColumn @bind-Field="@context.Trade" Filterable="true" Sortable="true"></TableColumn>
+                                <TableColumn @bind-Field="@context.DealWither"></TableColumn>
+                                <TableColumn @bind-Field="@context.Provice"></TableColumn>
+                                <TableColumn @bind-Field="@context.RegionQuestionNum"></TableColumn>
+                                <TableColumn @bind-Field="@context.NoMoidficationQuestionNum"></TableColumn>
+                                <TableColumn @bind-Field="@context.HandledQuestionNum"></TableColumn>
+                                <TableColumn @bind-Field="@context.AssistHandledQuestionNum"></TableColumn>
+                                <TableColumn @bind-Field="@context.ClosedQuestionNum"></TableColumn>
+                                <TableColumn @bind-Field="@context.RegionClosedQuestionRate"></TableColumn>
+                                <TableColumn @bind-Field="@context.HandledQuestionRate"></TableColumn>
+                            </TableColumns>
+                        </Table>
+                    </TabItem>
+                    <TabItem Text="小计">
+                        <Table TItem="ClosureRateOfRegionalIssuesDetailVm" Items="vmSubTotal" IsStriped="true" IsBordered="true" TableSize="TableSize.Normal"
+                               ShowLineNo="true" ShowSkeleton="true" Height="500">
+                            <TableColumns>
+                                <TableColumn @bind-Field="@context.Trade"></TableColumn>
+                                <TableColumn @bind-Field="@context.DealWither"></TableColumn>
+                                @*<TableColumn @bind-Field="@context.Provice"></TableColumn>*@
+                                <TableColumn @bind-Field="@context.RegionQuestionNum"></TableColumn>
+                                <TableColumn @bind-Field="@context.NoMoidficationQuestionNum"></TableColumn>
+                                <TableColumn @bind-Field="@context.HandledQuestionNum"></TableColumn>
+                                <TableColumn @bind-Field="@context.AssistHandledQuestionNum"></TableColumn>
+                                <TableColumn @bind-Field="@context.ClosedQuestionNum"></TableColumn>
+                                <TableColumn @bind-Field="@context.RegionClosedQuestionRate"></TableColumn>
+                                <TableColumn @bind-Field="@context.HandledQuestionRate"></TableColumn>
+                            </TableColumns>
+                        </Table>           
+                    </TabItem>
+                    <TabItem Text="合计">
+                        <Table TItem="ClosureRateOfRegionalIssuesDetailVm" Items="vmTotal" IsStriped="true" IsBordered="true" TableSize="TableSize.Normal"
+                               ShowLineNo="true" ShowSkeleton="true" Height="500">
+                            <TableColumns>
+                                <TableColumn @bind-Field="@context.Trade"></TableColumn>
+                                @*<TableColumn @bind-Field="@context.DealWither"></TableColumn>*@
+                                @*<TableColumn @bind-Field="@context.Provice"></TableColumn>*@
+                                <TableColumn @bind-Field="@context.RegionQuestionNum"></TableColumn>
+                                <TableColumn @bind-Field="@context.NoMoidficationQuestionNum"></TableColumn>
+                                <TableColumn @bind-Field="@context.HandledQuestionNum"></TableColumn>
+                                <TableColumn @bind-Field="@context.AssistHandledQuestionNum"></TableColumn>
+                                <TableColumn @bind-Field="@context.ClosedQuestionNum"></TableColumn>
+                                <TableColumn @bind-Field="@context.RegionClosedQuestionRate"></TableColumn>
+                                <TableColumn @bind-Field="@context.HandledQuestionRate"></TableColumn>
+                            </TableColumns>
+                        </Table>
+                    </TabItem>
+                </Tab>
+               
+            }
+        }
+        else if (loadFailed)
+        {
+            <h1>Sorry, we could not load this product due to an error.</h1>
+        }
+        else
+        {
+            <div class="d-flex justify-content-center">
+                <Spinner SpinnerType="SpinnerType.Grow"></Spinner>
+            </div>
+        }
+    </CardBody>
+</Card>

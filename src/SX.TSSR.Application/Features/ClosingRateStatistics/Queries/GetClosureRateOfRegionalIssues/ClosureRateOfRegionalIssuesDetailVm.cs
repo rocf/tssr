@@ -62,13 +62,13 @@ namespace SX.TSSR.Application.Features.ClosingRateStatistics.Queries.GetClosureR
         /// 区域关闭率
         /// </summary>
         [DisplayName("区域关闭率")]
-        public double RegionClosedQuestionRate { get; set; }
+        public string RegionClosedQuestionRate { get; set; }
 
         /// <summary>
         /// 负责人处理比例
         /// </summary>
-        [DisplayName("负责人处理比例")]
-        public double HandledQuestionRage { get; set; }
+        [DisplayName("负责人处理占比")]
+        public string HandledQuestionRate { get; set; }
 
     }
 }
